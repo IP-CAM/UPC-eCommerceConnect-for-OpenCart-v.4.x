@@ -217,30 +217,7 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
 
                 $json['error']['warning'] = $this->language->get('error_order');
 
-            } else if ($signature == $signature_response) {
-
-                //signature matched
-                if ($TranCode == '000'){
-                    
-                    //payment accepted
-                    $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_approved_status_id'), '', true);
-                    $json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'), true);
-
-                } else {
-
-                    //payment failed
-                    $this->log->write("paymebnt fail other reasonh");
-                    $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_failed_status_id'), '', true);                    
-                }
-
-            } else {
-
-                //bad signature
-                $this->log->write("signaure mismatch");
-                $json['error']['warning'] = $this->language->get('error_signature');
-                $this->model->model_extension_ecommerceconnect_payment_ecommerceconnect->log("Error response signature did not match");
             }
-
         }
 
         return $this->response->redirect($json['redirect']);

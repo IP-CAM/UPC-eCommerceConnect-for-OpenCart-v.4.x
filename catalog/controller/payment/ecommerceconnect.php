@@ -131,7 +131,6 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
     private function handlePaymentResponse()
     {
         if (!isset($_POST) || empty($_POST)) {
-            echo '';
             exit;
         }
 
@@ -166,58 +165,41 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
             $SD = $this->request->post['SD'];
             $TranCode = $this->request->post['TranCode'];
             $ApprovalCode = $this->request->post['ApprovalCode'];
-            $signature_response = $this->request->post["Signature"];
-
-            echo "MerchantID = " . $MerchantID . "\n";
-            echo "TerminalID = " . $TerminalID . "\n";
-            echo "OrderID = " . $OrderID . "\n";
-            echo "Currency = " . $CurrencyID . "\n";
-            echo "TotalAmount = " . $TotalAmount . "\n";
-            echo "XID = " . $XID . "\n";
-            echo "TranCode = " . $TranCode . "\n";
-            echo "PurchaseTime = " . $PurchaseTime . "\n";
-            echo "Response.action= approve \n";
-            echo "Response.reason= OK \n";
-            echo "Response.forwardUrl=  ".$this->url->link('checkout/success')."\n";
 
             $data = "$MerchantID;$TerminalID;$PurchaseTime;$OrderID;$XID;$CurrencyID;$TotalAmount;;$TranCode;$ApprovalCode;";
 
-            $signature_response = base64_decode($signature_response);
+            $signature_response = base64_decode($this->request->post["Signature"]);
 
             $pubkeyid = openssl_get_publickey($cert);
             $ok = openssl_verify($data, $signature_response, $pubkeyid);
 
-            if ($ok == 1){
-                  //signature matched
-                  if ($TranCode == '000'){
-                    
-                    //payment accepted
-                    $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_approved_status_id'), '', true);
-                    $json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'), true);
-
-                } else {
-                    //payment failed
-                    $this->log->write("paymebnt fail other reasonh");
-                    $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_failed_status_id'), '', true);                    
-                }
-            } else if ($ok == 0){
-                 //bad signature
-                 $this->log->write("signaure mismatch");
-                 $json['error']['warning'] = $this->language->get('error_signature');
-                 $this->model->model_extension_ecommerceconnect_payment_ecommerceconnect->log("Error response signature did not match");
-            }else{
+            if ($ok == 1)
+            {
+                echo "<b>good</b>";
+            } 
+            else if ($ok == 0) 
+            {
+                echo "<b>bad</b>";
+            }
+            else
+            {
                 echo "ugly, error checking signature";
             }
 
             unset($pubkeyid);
 
-            $formattedOrderId = str_pad($this->session->data['order_id'], 3, '0', STR_PAD_LEFT);
-
-            if($formattedOrderId != $OrderID){
-
-                $json['error']['warning'] = $this->language->get('error_order');
-
-            }
+            print
+	        "MerchantID=".$MerchantID."\n".
+	        "TerminalID=".$TerminalID."\n".
+	        "OrderID=".$OrderID."\n".
+	        "Currency=".$CurrencyID."\n".
+	        "TotalAmount=".$TotalAmount."\n".
+	        "XID=".$XID."\n".
+            "TranCode = " . $TranCode . "\n".
+	        "PurchaseTime=".$PurchaseTime."\n\n".
+	        "Response.action=approve\n".
+	        "Response.reason=OK\n".
+	        "Response.forwardUrl=".$this->url->link('checkout/success')."\n";
         }
 
         return $this->response->redirect($json['redirect']);

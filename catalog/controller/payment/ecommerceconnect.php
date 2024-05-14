@@ -167,8 +167,8 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
             }else{
                 //bad signature
                 $this->log->write("signaure mismatch");
-                $json['error']['warning'] = $this->language->get('error_hosted_signature');
-                $this->model->model_extension_ecommerceconnect_payment_ecommerceconnect->log("Error hosted signature did not match");
+                $json['error']['warning'] = $this->language->get('error_signature');
+                $this->model->model_extension_ecommerceconnect_payment_ecommerceconnect->log("Error signature did not match");
             }
 
             unset($pubkeyid);

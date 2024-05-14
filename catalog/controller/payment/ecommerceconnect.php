@@ -3,18 +3,12 @@ namespace Opencart\Catalog\Controller\Extension\Ecommerceconnect\Payment;
 
 class Ecommerceconnect extends \Opencart\System\Engine\Controller
 {
-    /**
-     * Set session to database to preserve between redirects
-     *
-     * @return void
-     */
     private function setSession()
 	{
         $this->load->model('extension/ecommerceconnect/payment/ecommerceconnect');
         
 		$rawSessionData = $this->session->data; 
 
-        //serialize
 		$serializedSession = json_encode($rawSessionData);
 
         $this->log->write("Session Write::".$serializedSession);
@@ -30,12 +24,6 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
 
 	}
 
-    /**
-     * Restore session from database
-     *
-     * @param [type] $sessionId
-     * @return string
-     */
 	private function getSession($sessionId): string
 	{
 
@@ -117,9 +105,7 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
         $data = $attributes;
         $data['logged'] = $this->customer->isLogged();
         $data['url'] = $this->config->get('payment_ecommerceconnect_url_0');
-
         $this->setSession();
-
         return $this->load->view('extension/ecommerceconnect/payment/ecommerceconnect', $data);
     }
 
@@ -138,21 +124,19 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
         $this->load->model('extension/ecommerceconnect/payment/ecommerceconnect');
         $this->load->model('checkout/order');
 
-        $this->getSession($_POST['Session']);
+        $this->getSession($this->request->post['SD']);
 
         $json['redirect'] = $this->url->link('checkout/failure', 'language=' . $this->config->get('config_language'), true);
 
         
         if (!isset($this->session->data['order_id'])) {
-            //order not found
 
             $this->log->write("Order was not found in session");
             $json['error']['warning'] = $this->language->get('error_order');
 
         } else {
-            //order found
-            
-            // Verify response is not tampered
+
+
             $cert = $this->config->get('payment_ecommerceconnect_cert_0');
 
             $MerchantID = $this->request->post['MerchantID'];
@@ -162,7 +146,6 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
             $TotalAmount = $this->request->post['TotalAmount'];
             $CurrencyID = $this->request->post['Currency'];
             $XID = $this->request->post['XID'];
-            $SD = $this->request->post['SD'];
             $TranCode = $this->request->post['TranCode'];
             $ApprovalCode = $this->request->post['ApprovalCode'];
 

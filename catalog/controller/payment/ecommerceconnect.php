@@ -156,17 +156,19 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
             $pubkeyid = openssl_get_publickey($cert);
             $ok = openssl_verify($data, $signature_response, $pubkeyid);
 
-            if ($ok == 1)
-            {
-                echo "<b>good</b>";
+            if ($ok == 1){
+                //payment accepted
+                $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_approved_status_id'), '', true);
             } 
-            else if ($ok == 0) 
-            {
-                echo "<b>bad</b>";
-            }
-            else
-            {
-                echo "ugly, error checking signature";
+            else if ($ok == 0){
+                //payment failed
+                $this->log->write("paymebnt fail other reason");
+                $this->model_checkout_order->addHistory($this->session->data['order_id'], $this->config->get('payment_ecommerceconnect_failed_status_id'), '', true);
+            }else{
+                //bad signature
+                $this->log->write("signaure mismatch");
+                $json['error']['warning'] = $this->language->get('error_hosted_signature');
+                $this->model->model_extension_oc_ecommerceconnect_payment_ecommerceconnect->log("Error hosted signature did not match");
             }
 
             unset($pubkeyid);

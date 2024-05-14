@@ -62,7 +62,7 @@ class Ecommerceconnect extends \Opencart\System\Engine\Controller
 			($this->model_checkout_cart->getTotals)($totals, $taxes, $total);
 		}
         
-        $amount = number_format($total, 2, '.', '');
+        $amount = number_format($total, 2, '.', '')*100;
         $language = strtoupper(substr($this->config->get('config_language'), 0, 2));
 
         if ($language == 'EN') {
